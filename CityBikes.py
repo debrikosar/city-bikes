@@ -1,10 +1,12 @@
+import os
+
 import pandas as pd
 from collections import Counter
 
-data = pd.read_csv('Data_Input/201608-citibike-tripdata.csv')
+# data = pd.read_csv('Data_Input/201608-citibike-tripdata.csv')
 
 
-def first_task():
+def first_task(data):
     trips_count = data.shape[0]
 
     longest_trip = data['tripduration'].max()
@@ -32,31 +34,60 @@ def first_task():
     ])
 
     general_stats.to_csv('Data_Output/general-stats.csv')
+    print("Created General Stats\n")
 
 
-def second_task():
-    temp = [x[0] for x in data['stoptime'].str.rsplit('/', 0)]
+def second_task(data):
+    month_list = [x[0] for x in data['stoptime'].str.rsplit('/', 0)]
 
-    usage_stats = pd.DataFrame([Counter(temp)])
+    usage_stats = pd.DataFrame([Counter(month_list)])
 
     usage_stats.to_csv('Data_Output/usage-stats.csv')
+    print("Created Usage Stats\n")
 
 
-def third_task():
+def third_task(data):
     bike_stats = pd.DataFrame()
 
     unique_bikes_id = data['bikeid'].unique()
 
-    for id in unique_bikes_id:
+    for current_id in unique_bikes_id:
         bike_stats = bike_stats.append(pd.DataFrame(
-            {'trips': data.bikeid[data.bikeid == id].count(), 'usage time': data.tripduration[data.bikeid == id].sum()},
-            index=[id]))
+            {'trips': data.bikeid[data.bikeid == current_id].count(),
+             'usage time': data.tripduration[data.bikeid == current_id].sum()},
+            index=[current_id]))
 
     bike_stats = bike_stats.sort_values(by='trips', ascending=False)
 
     bike_stats.to_csv('Data_Output/bike-stats.csv')
+    print("Created Bike Stats\n")
 
 
-first_task()
-second_task()
-third_task()
+def console_menu():
+
+    while True:
+        print("Specify data address")
+        data_address = input()
+        if os.path.isfile(data_address):
+            break
+        else:
+            print("Wrong input")
+
+    data = pd.read_csv(data_address)
+
+    while True:
+        print("Choose report type to generate: \n 1) Base stats \n 2) Usage stats \n 3) Bike stats \n 4) Exit")
+        temp = input()
+        if temp == "1":
+            first_task(data)
+        elif temp == "2":
+            second_task(data)
+        elif temp == "3":
+            third_task(data)
+        elif temp == "4":
+            break
+        else:
+            print("Wrong input")
+
+
+console_menu()
