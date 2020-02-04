@@ -1,12 +1,11 @@
+import argparse
 import os
 
 import pandas as pd
 from collections import Counter
 
-# data = pd.read_csv('Data_Input/201608-citibike-tripdata.csv')
 
-
-def first_task(data):
+def first_task(data, filename):
     trips_count = data.shape[0]
 
     longest_trip = data['tripduration'].max()
@@ -33,20 +32,20 @@ def first_task(data):
         'NaN values: ' + str(nan_values)
     ])
 
-    general_stats.to_csv('Data_Output/general-stats.csv')
+    general_stats.to_csv('Data_Output/'+filename+'-general-stats.csv')
     print("Created General Stats\n")
 
 
-def second_task(data):
+def second_task(data, filename):
     month_list = [x[0] for x in data['stoptime'].str.rsplit('/', 0)]
 
     usage_stats = pd.DataFrame([Counter(month_list)])
 
-    usage_stats.to_csv('Data_Output/usage-stats.csv')
+    usage_stats.to_csv('Data_Output/'+filename+'-usage-stats.csv')
     print("Created Usage Stats\n")
 
 
-def third_task(data):
+def third_task(data, filename):
     bike_stats = pd.DataFrame()
 
     unique_bikes_id = data['bikeid'].unique()
@@ -59,35 +58,30 @@ def third_task(data):
 
     bike_stats = bike_stats.sort_values(by='trips', ascending=False)
 
-    bike_stats.to_csv('Data_Output/bike-stats.csv')
+    bike_stats.to_csv('Data_Output/'+filename+'-bike-stats.csv')
     print("Created Bike Stats\n")
 
 
-def console_menu():
+def command_line_input():
+    parser = argparse.ArgumentParser(description='Reports management')
+    parser.add_argument('data_address', action='store')
+    parser.add_argument('--skip-general-stats', action='store_true', dest="skip_general_stats")
+    parser.add_argument('--skip-usage-stats', action='store_true', dest="skip_usage_stats")
+    parser.add_argument('--skip-bike-stats', action='store_true', dest="skip_bike_stats")
+    result = parser.parse_args()
 
-    while True:
-        print("Specify data address")
-        data_address = input()
-        if os.path.isfile(data_address):
-            break
-        else:
-            print("Wrong input")
-
-    data = pd.read_csv(data_address)
-
-    while True:
-        print("Choose report type to generate: \n 1) Base stats \n 2) Usage stats \n 3) Bike stats \n 4) Exit")
-        temp = input()
-        if temp == "1":
-            first_task(data)
-        elif temp == "2":
-            second_task(data)
-        elif temp == "3":
-            third_task(data)
-        elif temp == "4":
-            break
-        else:
-            print("Wrong input")
+    if not os.path.isfile(result.data_address):
+        print("Incorrect Data Adress")
+    else:
+        data = pd.read_csv(result.data_address)
+        filename = os.path.splitext(os.path.basename(result.data_address))[0]
+        if not result.skip_general_stats:
+            first_task(data, filename)
+        if not result.skip_usage_stats:
+            second_task(data, filename)
+        if not result.skip_bike_stats:
+            third_task(data, filename)
 
 
-console_menu()
+if __name__ == "__main__":
+    command_line_input()
