@@ -21,19 +21,14 @@ Creating bike-stats.csv file which contains list of unique bikes id sorted by
 
 # Prerequisites
 
-Python v3.8
-pip 20.0.2
-pandas 1.0.0
+- Python v3.8
+- pip 20.0.2
+- pandas 1.0.0
 
 # Usage
 
 ## Run
 
 Place your data set into Data_Input folder
-To execute file, install pandas by running pip intall pandas,
-then run CityBikes.py
-
-## Test
-
-Currently not implemented
-
+To execute file, install pandas by running `pip intall pandas`,
+then run `CityBikes.py`
