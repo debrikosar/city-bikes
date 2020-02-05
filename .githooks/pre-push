@@ -1,0 +1,19 @@
+#!/bin/bash
+
+current_branch=`git rev-parse --abbrev-ref HEAD`
+
+ERROR_LIST=$(find . -name \*.py  -not -path \*venv/\* -not -path \*.idea/\* | xargs pyflakes)
+RETVAL=$?
+if [[ $RETVAL -ne 0 ]]; then
+    echo "Code should be fixed before push"
+    echo "$ERROR_LIST"
+    exit $RETVAL
+fi
+
+if [ "$current_branch" == "master" ];
+then
+	echo 'Push to master blocked'
+	exit 1
+else
+	exit 0
+fi

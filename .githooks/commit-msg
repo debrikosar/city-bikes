@@ -1,0 +1,27 @@
+#!/bin/sh
+
+while read line; do
+	if [ "${line:0:1}" == "#" ]; 
+	then
+		continue
+	fi
+	if [ "${#line}" -le 10 ]; 
+	then
+		echo "Commit message could not be less then 10 characters"
+		exit 1
+	fi
+	words=( $line )
+	if (( ${#words[@]} < 2 )); 
+	then
+		echo "Commit message could not contain less then 2 words"
+		exit 1
+	fi
+	if [[ $line = *[![:ascii:]]* ]]; 
+	then
+		echo "Contains non-ASCII"
+		exit 1
+	fi
+done < "${1}"
+
+echo "Successfully commited"
+exit 0
