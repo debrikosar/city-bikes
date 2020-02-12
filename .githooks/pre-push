@@ -1,6 +1,7 @@
 #!/bin/bash
 
 current_branch=`git rev-parse --abbrev-ref HEAD`
+blocked_branch="master"
 
 ERROR_LIST=$(find . -name \*.py  -not -path \*venv/\* -not -path \*.idea/\* | xargs pyflakes)
 RETVAL=$?
@@ -10,7 +11,7 @@ if [[ $RETVAL -ne 0 ]]; then
     exit $RETVAL
 fi
 
-if [ "$current_branch" == "master" ];
+if [ "$current_branch" == "$blocked_branch" ];
 then
 	echo 'Push to master blocked'
 	exit 1

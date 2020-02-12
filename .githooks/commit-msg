@@ -1,27 +1,48 @@
-#!/bin/sh
+#!/bin/bash
 
-while read line; do
-	if [ "${line:0:1}" == "#" ]; 
-	then
-		continue
-	fi
-	if [ "${#line}" -le 10 ]; 
+function check_length {
+	if [ "${1}" -le 10 ]; 
 	then
 		echo "Commit message could not be less then 10 characters"
 		exit 1
-	fi
-	words=( $line )
+	fi	
+}
+
+function check_words_number {
+	words=( ${1} )
+
 	if (( ${#words[@]} < 2 )); 
 	then
 		echo "Commit message could not contain less then 2 words"
 		exit 1
 	fi
-	if [[ $line = *[![:ascii:]]* ]]; 
-	then
-		echo "Contains non-ASCII"
-		exit 1
+}
+
+function check_ascii {
+	if [[ $1 = *[![:ascii:]]* ]]; 
+		then
+			echo "Contains non-ASCII"
+			exit 1
 	fi
-done < "${1}"
+}
+
+function validate_commit_message {
+	while read line; do		
+		if [ "${line:0:1}" == "#" ]; 
+		then
+			continue
+		fi
+
+		check_length ${#line}
+
+		check_words_number "${line}"
+
+		check_ascii "${line}"
+
+	done < "${1}"
+}
+
+validate_commit_message "${1}"
 
 echo "Successfully commited"
 exit 0
