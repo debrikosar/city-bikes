@@ -11,8 +11,7 @@ if [[ $RETVAL -ne 0 ]]; then
     exit $RETVAL
 fi
 
-if [ "$current_branch" == "$blocked_branch" ];
-then
+if [ "$current_branch" == "$blocked_branch" ]; then
 	echo 'Push to master blocked'
 	exit 1
 else
