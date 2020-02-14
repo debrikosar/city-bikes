@@ -1,8 +1,8 @@
 import argparse
 import os
-
 import pandas as pd
 from collections import Counter
+import time
 
 
 def first_task(data, filename):
@@ -46,19 +46,11 @@ def second_task(data, filename):
 
 
 def third_task(data, filename):
-    bike_stats = pd.DataFrame()
+    bike_test = data.groupby(['bikeid'])\
+        .agg(Trips=('tripduration', 'count'), Duration=('tripduration', 'sum'))
+    bike_test = bike_test.sort_values(by='Trips', ascending=False)
+    bike_test.to_csv('Data_Output/' + filename + '-bike-stats.csv')
 
-    unique_bikes_id = data['bikeid'].unique()
-
-    for current_id in unique_bikes_id:
-        bike_stats = bike_stats.append(pd.DataFrame(
-            {'trips': data.bikeid[data.bikeid == current_id].count(),
-             'usage time': data.tripduration[data.bikeid == current_id].sum()},
-            index=[current_id]))
-
-    bike_stats = bike_stats.sort_values(by='trips', ascending=False)
-
-    bike_stats.to_csv('Data_Output/'+filename+'-bike-stats.csv')
     print("Created Bike Stats\n")
 
 
