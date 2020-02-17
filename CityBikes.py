@@ -3,9 +3,11 @@ import os
 import pandas as pd
 from collections import Counter
 import time
+import concurrent.futures
+import glob
 
 
-def first_task(data, filename):
+def first_task(data):
     trips_count = data.shape[0]
 
     longest_trip = data['tripduration'].max()
@@ -32,47 +34,67 @@ def first_task(data, filename):
         'NaN values: ' + str(nan_values)
     ])
 
-    general_stats.to_csv('Data_Output/'+filename+'-general-stats.csv')
     print("Created General Stats\n")
+    return general_stats
 
 
-def second_task(data, filename):
+def second_task(data):
     month_list = [x[0] for x in data['stoptime'].str.rsplit('/', 0)]
 
     usage_stats = pd.DataFrame([Counter(month_list)])
 
-    usage_stats.to_csv('Data_Output/'+filename+'-usage-stats.csv')
     print("Created Usage Stats\n")
+    return usage_stats
 
 
-def third_task(data, filename):
-    bike_test = data.groupby(['bikeid'])\
+def third_task(data):
+    bike_stats = data.groupby(['bikeid'])\
         .agg(Trips=('tripduration', 'count'), Duration=('tripduration', 'sum'))
-    bike_test = bike_test.sort_values(by='Trips', ascending=False)
-    bike_test.to_csv('Data_Output/' + filename + '-bike-stats.csv')
+    bike_stats = bike_stats.sort_values(by='Trips', ascending=False)
 
     print("Created Bike Stats\n")
+    return bike_stats
+
+
+def file_processing(filename):
+    data = pd.read_csv(filename)
+    results = [first_task(data), second_task(data), third_task(data)]
+    return results
 
 
 def command_line_input():
+    start_time = time.time()
+
     parser = argparse.ArgumentParser(description='Reports management')
-    parser.add_argument('data_address', action='store')
+    parser.add_argument('folder_address', action='store')
     parser.add_argument('--skip-general-stats', action='store_true', dest="skip_general_stats")
     parser.add_argument('--skip-usage-stats', action='store_true', dest="skip_usage_stats")
     parser.add_argument('--skip-bike-stats', action='store_true', dest="skip_bike_stats")
     result = parser.parse_args()
 
-    if not os.path.isfile(result.data_address):
-        print("Incorrect Data Adress")
+    files = []
+    first_task_results = []
+    second_task_results = []
+    third_task_results = []
+
+    if not os.path.exists(result.folder_address):
+        print("Incorrect Folder Address")
     else:
-        data = pd.read_csv(result.data_address)
-        filename = os.path.splitext(os.path.basename(result.data_address))[0]
-        if not result.skip_general_stats:
-            first_task(data, filename)
-        if not result.skip_usage_stats:
-            second_task(data, filename)
-        if not result.skip_bike_stats:
-            third_task(data, filename)
+        for file in glob.glob(result.folder_address + "/*.csv"):
+            files.append(file)
+            print(file)
+
+        with concurrent.futures.ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
+            for i in executor.map(file_processing, files):
+                first_task_results.append(i[0])
+                second_task_results.append(i[1])
+                third_task_results.append(i[2])
+
+            pd.concat(first_task_results).to_csv('Data_Output/first.csv')
+            pd.concat(second_task_results).to_csv('Data_Output/second.csv')
+            pd.concat(third_task_results).to_csv('Data_Output/third.csv')
+
+    print(time.time()-start_time)
 
 
 if __name__ == "__main__":
