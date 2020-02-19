@@ -134,9 +134,9 @@ def command_line_input():
                 second_task_raw_results.append(i[1])
                 third_task_raw_results.append(i[2])
 
-            combine_first_task_pd(first_task_raw_results).to_csv('Data_Output/first.csv')
-            combine_second_task_pd(second_task_raw_results).to_csv('Data_Output/second.csv')
-            combine_third_task_pd(third_task_raw_results).to_csv('Data_Output/third.csv')
+            combine_first_task_pd(first_task_raw_results).to_csv('Data_Output/general-stats.csv')
+            combine_second_task_pd(second_task_raw_results).to_csv('Data_Output/usage-stats.csv')
+            combine_third_task_pd(third_task_raw_results).to_csv('Data_Output/bike-stats.csv')
 
     print(time.time()-start_time)
 
